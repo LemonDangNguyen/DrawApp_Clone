@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/rounded_border.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Màu nền trong suốt -->
+    <solid android:color="@android:color/transparent" />
+
+    <!-- Định nghĩa viền (stroke) -->
+    <stroke
+        android:width="2dp"
+        android:color="@android:color/darker_gray" />
+
+    <!-- Góc bo -->
+    <corners android:radius="12dp" />
+</shape>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "783776553914",
+    "project_id": "draw-animation-4f567",
+    "storage_bucket": "draw-animation-4f567.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:783776553914:android:0fb5fb27f8dc0e9c979b83",
+        "android_client_info": {
+          "package_name": "com.draw"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJ5ByX9wPQNZq9hn0-90NGQtu-frM4m90"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

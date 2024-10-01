@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E8E8E8"
+    tools:context=".activity.DrawActivity">
+
+    <LinearLayout
+        android:id="@+id/ln_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:paddingTop="56dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_back" />
+
+        <ImageView
+            android:id="@+id/btn_flip"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_flip" />
+
+        <ImageView
+            android:id="@+id/btn_undo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_undo" />
+
+        <ImageView
+            android:id="@+id/btn_redo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_redo" />
+
+        <ImageView
+            android:id="@+id/btn_reset"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_refresh" />
+
+        <ImageView
+            android:id="@+id/btn_option"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/ic_option" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ln_pen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:background="@drawable/bg_radius_12dp"
+        android:elevation="4dp"
+        android:gravity="center"
+        android:layout_marginTop="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ln_header">
+
+
+        <ImageView
+            android:id="@+id/btn_pen"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_radius_12dp"
+            android:backgroundTint="#01C296"
+            android:padding="16dp"
+            android:src="@drawable/ic_pen" />
+
+        <ImageView
+            android:id="@+id/btn_eraser"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_radius_12dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_eraser" />
+
+        <ImageView
+            android:id="@+id/btn_color"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_radius_12dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_pourcolor" />
+
+        <ImageView
+            android:id="@+id/btn_copy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_radius_12dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_copy" />
+
+        <ImageView
+            android:id="@+id/btn_insert_sticker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_radius_12dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_stickerz_icon" />
+
+        <ImageView
+            android:id="@+id/btn_insert_picture"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_radius_12dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_pic" />
+
+        <ImageView
+            android:id="@+id/btn_insert_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_radius_12dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_insert_text" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ln_penwidth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_radius_20dp"
+        android:backgroundTint="@color/white"
+        android:elevation="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/ln_pen"
+        app:layout_constraintTop_toBottomOf="@+id/ln_pen">
+
+        <FrameLayout
+            android:id="@+id/btn_colorr"
+            android:layout_width="60px"
+            android:layout_height="60px">
+
+            <TextView
+                android:id="@+id/ic_color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_radius_100dp"
+                android:backgroundTint="@color/black" />
+        </FrameLayout>
+
+        <SeekBar
+            android:id="@+id/sb_penwith"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:max="60"
+            android:min="5"
+            android:progress="10"
+            android:progressDrawable="@drawable/custom_track_seekbar"
+            android:splitTrack="false"
+            android:thumb="@drawable/custom_thumb" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/ln_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ln_pen"
+        app:layout_constraintVertical_bias="0.4">
+        <com.draw.viewcustom.DrawView
+            android:id="@+id/draw_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:penColor="#000000"
+            app:penWidth="10" />
+        <com.draw.viewcustom.StickerPhotoView
+            android:id="@+id/stickerPhotoView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <com.draw.viewcustom.StickerMemeView
+            android:id="@+id/stickerMemeView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <com.draw.viewcustom.StickerTextView
+            android:id="@+id/stickerTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/img_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:visibility="invisible" />
+
+
+
+
+
+
+
+    </FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ln_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:elevation="1dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/btn_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/ic_pause"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/ln_create"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/ln_create" />
+
+        <LinearLayout
+            android:id="@+id/ln_create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/rcv_draw">
+
+            <ImageView
+                android:id="@+id/btn_previos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_previos"
+                app:tint="#C5C9CC" />
+
+            <ImageView
+                android:id="@+id/btn_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="20dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_play_2" />
+
+            <ImageView
+                android:id="@+id/btn_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                android:src="@drawable/ic_next" />
+
+            <TextView
+                android:id="@+id/btn_create_animation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_radius_16dp"
+                android:backgroundTint="#01C296"
+                android:ellipsize="marquee"
+                android:fontFamily="@font/i_ciel_cadena"
+                android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="12dp"
+                android:singleLine="true"
+                android:text="@string/create_animation"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_draw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:layout_editor_absoluteX="31dp"
+            tools:listitem="@layout/item_draw" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
