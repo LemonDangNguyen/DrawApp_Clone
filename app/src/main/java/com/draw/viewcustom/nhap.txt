@@ -52,10 +52,9 @@ class StickerTextView @JvmOverloads constructor(
     private fun setupView() {
         borderView = RelativeLayout(context).apply {
             background = createBorderDrawable()
-            layoutParams =
-                LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-                    addRule(CENTER_IN_PARENT, TRUE)
-                }
+            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                addRule(CENTER_IN_PARENT, TRUE)
+            }
             isVisible = false
         }
         addView(borderView)
@@ -77,10 +76,9 @@ class StickerTextView @JvmOverloads constructor(
             textSize = 24f
             setTextColor(Color.BLACK)
             setBackgroundColor(Color.TRANSPARENT)
-            layoutParams =
-                LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-                    addRule(CENTER_IN_PARENT, TRUE)
-                }
+            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                addRule(CENTER_IN_PARENT, TRUE)
+            }
         }
         addView(stickerTextView)
 
@@ -180,7 +178,7 @@ class StickerTextView @JvmOverloads constructor(
 
     private fun flipSticker() {
         stickerTextView.scaleX *= -1
-
+        updateBorderSize() // Cập nhật lại kích thước khung viền sau khi lật
     }
 
     private fun removeSticker() {
@@ -196,7 +194,6 @@ class StickerTextView @JvmOverloads constructor(
                 borderView.isVisible = true
                 hideBorderHandler.removeCallbacks(hideBorderRunnable)
             }
-
             MotionEvent.ACTION_MOVE -> {
                 if (isResizing) {
                     val deltaX = event.rawX - lastX
@@ -214,7 +211,6 @@ class StickerTextView @JvmOverloads constructor(
                     lastY = event.rawY
                 }
             }
-
             MotionEvent.ACTION_UP -> {
                 isResizing = false
                 hideBorderHandler.postDelayed(hideBorderRunnable, 2000)
@@ -227,14 +223,11 @@ class StickerTextView @JvmOverloads constructor(
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 initialRotation = getAngle(event.rawX, event.rawY)
-                midPoint[0] =
-                    stickerTextView.x + (stickerTextView.width * stickerTextView.scaleX) / 2
-                midPoint[1] =
-                    stickerTextView.y + (stickerTextView.height * stickerTextView.scaleY) / 2
+                midPoint[0] = stickerTextView.x + (stickerTextView.width * stickerTextView.scaleX) / 2
+                midPoint[1] = stickerTextView.y + (stickerTextView.height * stickerTextView.scaleY) / 2
                 borderView.isVisible = true
                 hideBorderHandler.removeCallbacks(hideBorderRunnable)
             }
-
             MotionEvent.ACTION_MOVE -> {
                 val newAngle = getAngle(event.rawX, event.rawY)
                 val deltaAngle = newAngle - initialRotation
@@ -244,7 +237,6 @@ class StickerTextView @JvmOverloads constructor(
                 initialRotation = newAngle
                 updateBorderSize() // Cập nhật lại khung viền
             }
-
             MotionEvent.ACTION_UP -> {
                 hideBorderHandler.postDelayed(hideBorderRunnable, 2000)
             }
@@ -268,24 +260,6 @@ class StickerTextView @JvmOverloads constructor(
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event?.let {
-            // Lấy tọa độ chạm
-            val touchX = it.x
-            val touchY = it.y
-
-            // Lấy vùng (hit rect) của stickerTextView (vùng chứa nội dung chính)
-            val stickerRect = stickerTextView.run {
-                val rect = android.graphics.Rect()
-                getHitRect(rect)
-                rect
-            }
-
-            // Kiểm tra xem điểm chạm có nằm trong vùng stickerTextView hay không
-            if (!stickerRect.contains(touchX.toInt(), touchY.toInt())) {
-                // Nếu không chạm vào stickerTextView thì không di chuyển sticker
-                return false
-            }
-
-            // Nếu chạm vào stickerTextView thì xử lý di chuyển
             when (it.action) {
                 MotionEvent.ACTION_DOWN -> {
                     if (!isResizing) {
@@ -298,7 +272,6 @@ class StickerTextView @JvmOverloads constructor(
 
                     }
                 }
-
                 MotionEvent.ACTION_MOVE -> {
                     if (isMoving) {
                         val deltaX = it.rawX - lastX
@@ -312,7 +285,6 @@ class StickerTextView @JvmOverloads constructor(
 
                     }
                 }
-
                 MotionEvent.ACTION_UP -> {
                     isMoving = false
                     hideBorderHandler.postDelayed(hideBorderRunnable, 2000)
@@ -323,5 +295,4 @@ class StickerTextView @JvmOverloads constructor(
         }
         return true
     }
-
 }

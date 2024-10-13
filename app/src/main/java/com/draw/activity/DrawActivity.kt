@@ -524,9 +524,7 @@ class DrawActivity : BaseActivity() {
             val drawBitmap = getBitmapFromPathListHistory(draw.listHistory, binding.drawView.width, binding.drawView.height)
             canvas.drawBitmap(drawBitmap, 0f, 0f, null)
 
-            // Vẽ nội dung từ StickerTextView lên canvas
-            val stickerBitmap = binding.stickerTextView.getStickerBitmap()
-            canvas.drawBitmap(stickerBitmap, 0f, 0f, null)
+
 
             encoder.addFrame(frameBitmap)
         }

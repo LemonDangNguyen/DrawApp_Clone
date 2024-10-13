@@ -14,6 +14,7 @@ import yuku.ambilwarna.AmbilWarnaDialog.OnAmbilWarnaListener
 
 class StickerTextDialog(
     private val stickerTextView: StickerTextView,
+
     // This is the default color of the preview box
     private var mDefaultColor: Int = 0
 ) : BottomSheetDialogFragment() {
@@ -32,14 +33,13 @@ class StickerTextDialog(
         mColorPreview  = dialogView.findViewById(R.id.preview_selected_color)
         mDefaultColor = 0
         var pickColorButton = dialogView.findViewById<TextView>(R.id.pick_color_button)
-        var setcolorButton = dialogView.findViewById<TextView>(R.id.set_color_button)
-
-        setcolorButton.setOnClickListener {
-            stickerTextView.setTextColor(mDefaultColor)
-        }
+        //var setcolorButton = dialogView.findViewById<TextView>(R.id.set_color_button)
+//        setcolorButton.setOnClickListener {
+//            stickerTextView.setTextColor(mDefaultColor)
+//        }
         // Thiết lập nút chọn màu
         pickColorButton.setOnClickListener {
-            showColorPicker()
+            showColorPicker(dialogView)
         }
 
         val ivCheck = dialogView.findViewById<ImageView>(R.id.ivCheck)
@@ -53,25 +53,30 @@ class StickerTextDialog(
         return dialogView
     }
 
-    private fun showColorPicker() {
-        // The AmbilWarnaDialog callback needs 3 parameters
+    private fun showColorPicker(dialogView: View) {
+        // Tạo AmbilWarnaDialog để chọn màu
         val colorPickerDialogue = AmbilWarnaDialog(this.activity, mDefaultColor,
             object : OnAmbilWarnaListener {
                 override fun onCancel(dialog: AmbilWarnaDialog?) {
-                    // Leave this function body blank, as the dialog
-                    // automatically closes when clicked on cancel button
+                    // Không cần thực hiện gì khi hủy dialog
                 }
 
                 override fun onOk(dialog: AmbilWarnaDialog?, color: Int) {
-                    // Change the mDefaultColor to change the GFG text color
+                    // Đổi màu mDefaultColor theo màu được chọn
                     mDefaultColor = color
-
-                    // Now change the picked color preview box to mDefaultColor
+                    // Đặt màu cho xem trước và `stickerTextView`
                     mColorPreview.setBackgroundColor(mDefaultColor)
+                    stickerTextView.setTextColor(mDefaultColor)
+
+                    // Đặt màu cho `etInput`
+                    val etInput: EditText = dialogView.findViewById(R.id.etInput)
+                    etInput.setTextColor(mDefaultColor) // sử dụng màu đã chọn
                 }
             })
         colorPickerDialogue.show()
     }
+
+
 
 
 }

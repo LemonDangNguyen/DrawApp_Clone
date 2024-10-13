@@ -1,284 +1,313 @@
 package com.draw.viewcustom
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RectShape
-import android.util.AttributeSet
-import android.view.Gravity
-import android.view.MotionEvent
-import android.view.View
-import android.widget.RelativeLayout
-import androidx.appcompat.widget.AppCompatImageView
-import com.draw.R
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.hypot
-import kotlin.math.sin
 import android.os.Handler
 import android.os.Looper
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.view.isVisible
+import com.draw.R
+import com.draw.callback.ICallBackCheck
+import kotlin.math.atan2
 
 class StickerMemeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : RelativeLayout(context, attrs) {
 
-    private lateinit var memeImageView: AppCompatImageView
+    private lateinit var stickerImageView: ImageView
+    private lateinit var borderView: RelativeLayout
     private lateinit var deleteButton: AppCompatImageView
     private lateinit var flipButton: AppCompatImageView
     private lateinit var transformButton: AppCompatImageView
-    private lateinit var borderView: View
-    private var isDragging = false
-    private var lastTouchX = 0f
-    private var lastTouchY = 0f
+    private lateinit var rotateButton: AppCompatImageView
 
-    private var isTransforming = false
-    private var initialDistance = 0f
-    private var initialRotation = 0f
+    private var lastX: Float = 0f
+    private var lastY: Float = 0f
+    private var isResizing = false
+    private var isMoving = false
+    private var initialRotation: Float = 0f
+    private var midPoint = FloatArray(2)
+    private var currentRotation: Float = 0f
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var hideButtonsRunnable: Runnable? = null
+    private val hideBorderHandler = Handler(Looper.getMainLooper())
+    private val hideBorderRunnable = Runnable { borderView.isVisible = false }
+
+    private var isHandleCheck: ICallBackCheck? = null
 
     init {
-        initMemeView()
+        setupView()
     }
 
-    private fun initMemeView() {
-        memeImageView = createImageView()
-        borderView = createBorderView()
-        deleteButton = createControlButton(R.drawable.ic_sticker_delete) { removeMeme() }
-        flipButton = createControlButton(R.drawable.ic_sticker_flip) { flipMeme() }
-        transformButton = createTransformButton()
-
-        addView(memeImageView)
-        addView(borderView)
-        addView(deleteButton)
-        addView(flipButton)
-        addView(transformButton)
-    }
-
-    private fun createImageView(): AppCompatImageView {
-        return AppCompatImageView(context).apply {
-            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            setOnTouchListener { _, event -> handleTouch(event) }
-            gravity = Gravity.CENTER
-        }
-    }
-
-    private fun createBorderView(): View {
-        return View(context).apply {
-            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+    private fun setupView() {
+        // Tạo view chứa viền và các nút điều khiển
+        borderView = RelativeLayout(context).apply {
             background = createBorderDrawable()
+            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                addRule(CENTER_IN_PARENT, TRUE)
+            }
+            isVisible = false
         }
+        addView(borderView)
+
+        // Tạo stickerImageView để chứa hình ảnh sticker
+        stickerImageView = ImageView(context).apply {
+            setImageResource(R.drawable.anhtest)
+            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                addRule(CENTER_IN_PARENT, TRUE)
+            }
+        }
+        addView(stickerImageView)
+
+        // Tạo các nút chức năng
+        setupControlButtons()
+
+        updateBorderSize() // Cập nhật kích thước viền ban đầu
+    }
+
+    private fun setupControlButtons() {
+        deleteButton = AppCompatImageView(context).apply {
+            setImageResource(R.drawable.ic_sticker_delete)
+            layoutParams = LayoutParams(30, 30).apply {
+                addRule(ALIGN_PARENT_TOP, TRUE)
+                addRule(ALIGN_PARENT_END, TRUE)
+            }
+            setOnClickListener { removeSticker() }
+        }
+        borderView.addView(deleteButton)
+
+        flipButton = AppCompatImageView(context).apply {
+            setImageResource(R.drawable.ic_sticker_flip)
+            layoutParams = LayoutParams(30, 30).apply {
+                addRule(ALIGN_PARENT_TOP, TRUE)
+                addRule(CENTER_HORIZONTAL, TRUE)
+            }
+            setOnClickListener { flipSticker() }
+        }
+        borderView.addView(flipButton)
+
+        transformButton = AppCompatImageView(context).apply {
+            setImageResource(R.drawable.ic_sticker_resize)
+            layoutParams = LayoutParams(100, 100).apply {
+                addRule(ALIGN_PARENT_BOTTOM, TRUE)
+                addRule(ALIGN_PARENT_END, TRUE)
+            }
+            setOnTouchListener { _, event -> handleTransform(event) }
+        }
+        borderView.addView(transformButton)
+
+        rotateButton = AppCompatImageView(context).apply {
+            setImageResource(R.drawable.ic_sticker_rotate)
+            layoutParams = LayoutParams(30, 30).apply {
+                addRule(ALIGN_PARENT_BOTTOM, TRUE)
+                addRule(ALIGN_PARENT_START, TRUE)
+            }
+            setOnTouchListener { _, event -> handleRotate(event) }
+        }
+        borderView.addView(rotateButton)
     }
 
     private fun createBorderDrawable(): ShapeDrawable {
         return ShapeDrawable(RectShape()).apply {
             paint.color = Color.DKGRAY
-            paint.style = Paint.Style.STROKE
             paint.strokeWidth = 5f
+            paint.style = Paint.Style.STROKE
         }
-    }
-
-    private fun createControlButton(resId: Int, onClick: () -> Unit): AppCompatImageView {
-        return AppCompatImageView(context).apply {
-            setImageResource(resId)
-            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            setOnClickListener { onClick() }
-        }
-    }
-
-    private fun createTransformButton(): AppCompatImageView {
-        return AppCompatImageView(context).apply {
-            setImageResource(R.drawable.ic_sticker_resize)
-            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            setOnTouchListener { _, event -> handleTransform(event) }
-        }
-    }
-
-    fun setImage(bitmap: Bitmap) {
-        memeImageView.setImageBitmap(bitmap)
-        updateControlButtonPositions()
-        updateBorderSize()
-    }
-
-    fun setImageResource(resourceId: Int) {
-        memeImageView.setImageResource(resourceId)
-        updateControlButtonPositions()
-        updateBorderSize()
-    }
-
-    private fun updateControlButtonPositions() {
-        val borderPadding = -3  // Đặt khoảng cách từ nút đến viền là -3
-        val borderWidth = borderView.width
-        val borderHeight = borderView.height
-        val centerX = borderView.x + borderWidth / 2
-        val centerY = borderView.y + borderHeight / 2
-        val angle = Math.toRadians(memeImageView.rotation.toDouble())
-
-        val buttonSize = (borderWidth * 0.2).toInt()
-        updateButtonSize(deleteButton, buttonSize)
-        updateButtonSize(flipButton, buttonSize)
-        updateButtonSize(transformButton, buttonSize)
-
-        // Điều chỉnh offset với borderPadding
-        setButtonPosition(deleteButton, centerX, centerY, (borderWidth / 2 + borderPadding).toFloat(), (-borderHeight / 2 + borderPadding).toFloat(), angle)
-        setButtonPosition(flipButton, centerX, centerY, (0 + borderPadding).toFloat(), (-borderHeight / 2 + borderPadding).toFloat(), angle)
-        setButtonPosition(transformButton, centerX, centerY, (borderWidth / 2 + borderPadding).toFloat(), (borderHeight / 2 + borderPadding).toFloat(), angle)
-
-        updateBorderSize()
     }
 
     private fun updateBorderSize() {
-        val padding = 10
-        val imageWidth = memeImageView.width
-        val imageHeight = memeImageView.height
-        borderView.layoutParams = LayoutParams(
-            imageWidth + padding,
-            imageHeight + padding
-        )
-        borderView.x = memeImageView.x - padding / 2
-        borderView.y = memeImageView.y - padding / 2
+        val imageWidth = stickerImageView.width
+        val imageHeight = stickerImageView.height
+        val padding = 70f
+
+        val newWidth = (imageWidth * stickerImageView.scaleX + padding).toInt()
+        val newHeight = (imageHeight * stickerImageView.scaleY + padding).toInt()
+
+        borderView.layoutParams = LayoutParams(newWidth, newHeight).apply {
+            addRule(CENTER_IN_PARENT, TRUE)
+        }
+        borderView.requestLayout()
+
+        updateButtonPositions()
     }
 
-    private fun setButtonPosition(button: View, centerX: Float, centerY: Float, offsetX: Float, offsetY: Float, angle: Double) {
-        val rotatedX = centerX + (offsetX * cos(angle) - offsetY * sin(angle))
-        val rotatedY = centerY + (offsetX * sin(angle) + offsetY * cos(angle))
-        button.x = (rotatedX - button.width / 2).toFloat()
-        button.y = (rotatedY - button.height / 2).toFloat()
-    }
+    private fun updateButtonPositions() {
+        val buttonSize = 50
+        val borderPadding = -3
 
-    private fun updateButtonSize(button: View, size: Int) {
-        button.layoutParams = button.layoutParams.apply {
-            width = size
-            height = size
+        deleteButton.layoutParams = LayoutParams(buttonSize, buttonSize).apply {
+            addRule(ALIGN_PARENT_TOP, TRUE)
+            addRule(ALIGN_PARENT_END, TRUE)
+            setMargins(borderPadding, borderPadding, borderPadding, borderPadding)
+        }
+
+        flipButton.layoutParams = LayoutParams(buttonSize, buttonSize).apply {
+            addRule(ALIGN_PARENT_TOP, TRUE)
+            addRule(CENTER_HORIZONTAL, TRUE)
+            setMargins(0, borderPadding, 0, borderPadding)
+        }
+
+        transformButton.layoutParams = LayoutParams(buttonSize, buttonSize).apply {
+            addRule(ALIGN_PARENT_BOTTOM, TRUE)
+            addRule(ALIGN_PARENT_END, TRUE)
+            setMargins(borderPadding, 0, borderPadding, borderPadding)
+        }
+
+        rotateButton.layoutParams = LayoutParams(buttonSize, buttonSize).apply {
+            addRule(ALIGN_PARENT_BOTTOM, TRUE)
+            addRule(ALIGN_PARENT_START, TRUE)
+            setMargins(borderPadding, 0, borderPadding, borderPadding)
         }
     }
 
-    private fun flipMeme() {
-        memeImageView.scaleX *= -1
-        updateBorderSize()
+    private fun flipSticker() {
+        stickerImageView.scaleX *= -1
     }
 
-    private fun removeMeme() {
+    private fun removeSticker() {
         this.visibility = View.GONE
-    }
-
-    private fun handleTouch(event: MotionEvent): Boolean {
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                lastTouchX = event.rawX
-                lastTouchY = event.rawY
-                isDragging = true
-                showControlButtons()
-                scheduleHideControlButtons()
-            }
-            MotionEvent.ACTION_MOVE -> {
-                if (isDragging) {
-                    val deltaX = event.rawX - lastTouchX
-                    val deltaY = event.rawY - lastTouchY
-
-                    memeImageView.translationX += deltaX
-                    memeImageView.translationY += deltaY
-                    borderView.translationX += deltaX
-                    borderView.translationY += deltaY
-
-                    lastTouchX = event.rawX
-                    lastTouchY = event.rawY
-
-                    updateControlButtonPositions()
-                }
-            }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                isDragging = false
-            }
-        }
-        return true
     }
 
     private fun handleTransform(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                lastTouchY = event.rawY
-                initialDistance = memeImageView.scaleX
-                initialRotation = getAngle(event.rawX - memeImageView.x, event.rawY - memeImageView.y)
-                isTransforming = true
+                isResizing = true
+                lastX = event.rawX
+                lastY = event.rawY
+                showBorder()
             }
+
             MotionEvent.ACTION_MOVE -> {
-                if (isTransforming) {
-                    val deltaY = event.rawY - lastTouchY
+                if (isResizing) {
+                    val deltaX = event.rawX - lastX
+                    val deltaY = event.rawY - lastY
+                    val newScaleX = stickerImageView.scaleX + deltaX / 200
+                    val newScaleY = stickerImageView.scaleY + deltaY / 200
 
-                    // Thay đổi kích thước ảnh
-                    val scaleFactor = initialDistance + deltaY / 500f
-                    if (scaleFactor in 0.5f..2f) {
-                        memeImageView.scaleX = scaleFactor
-                        memeImageView.scaleY = scaleFactor
-                        borderView.scaleX = scaleFactor
-                        borderView.scaleY = scaleFactor
-                        updateControlButtonPositions()
-
+                    if (newScaleX > 0.1f && newScaleY > 0.1f) {
+                        stickerImageView.scaleX = newScaleX
+                        stickerImageView.scaleY = newScaleY
+                        updateBorderSize()
                     }
 
-                    // Thay đổi góc xoay của ảnh
-                    val newRotation = getAngle(event.rawX - memeImageView.x, event.rawY - memeImageView.y)
-                    memeImageView.rotation += newRotation - initialRotation
-                    borderView.rotation += newRotation - initialRotation
-                    initialRotation = newRotation
-
-                    // Gọi hàm cập nhật vị trí của các nút điều chỉnh
-                    updateControlButtonPositions()
+                    lastX = event.rawX
+                    lastY = event.rawY
                 }
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                isTransforming = false
+
+            MotionEvent.ACTION_UP -> {
+                isResizing = false
+                hideBorderAfterDelay()
             }
         }
         return true
     }
 
+    private fun handleRotate(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                initialRotation = getAngle(event.rawX, event.rawY)
+                midPoint[0] = stickerImageView.x + (stickerImageView.width * stickerImageView.scaleX) / 2
+                midPoint[1] = stickerImageView.y + (stickerImageView.height * stickerImageView.scaleY) / 2
+                showBorder()
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                val newAngle = getAngle(event.rawX, event.rawY)
+                val deltaAngle = newAngle - initialRotation
+                currentRotation += deltaAngle
+                stickerImageView.rotation = currentRotation
+                borderView.rotation = currentRotation
+                initialRotation = newAngle
+                updateBorderSize()
+            }
+
+            MotionEvent.ACTION_UP -> {
+                hideBorderAfterDelay()
+            }
+        }
+        return true
+    }
 
     private fun getAngle(x: Float, y: Float): Float {
-        return Math.toDegrees(atan2(y, x).toDouble()).toFloat()
+        val dx = x - midPoint[0]
+        val dy = y - midPoint[1]
+        return (atan2(dy, dx) * (180 / Math.PI)).toFloat()
     }
 
-    private fun showControlButtons() {
-        deleteButton.visibility = View.VISIBLE
-        flipButton.visibility = View.VISIBLE
-        transformButton.visibility = View.VISIBLE
-        borderView.visibility = View.VISIBLE
+    fun setICallBackCheck(callback: ICallBackCheck) {
+        isHandleCheck = callback
     }
 
-    private fun hideControlButtons() {
-        deleteButton.visibility = View.GONE
-        flipButton.visibility = View.GONE
-        transformButton.visibility = View.GONE
-        borderView.visibility = View.GONE
-    }
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let {
+            val touchX = it.x
+            val touchY = it.y
 
-    private fun scheduleHideControlButtons() {
-        hideButtonsRunnable?.let { handler.removeCallbacks(it) }
+            val stickerRect = stickerImageView.run {
+                val rect = android.graphics.Rect()
+                getHitRect(rect)
+                rect
+            }
 
-        hideButtonsRunnable = Runnable {
-            hideControlButtons()
+            if (!stickerRect.contains(touchX.toInt(), touchY.toInt())) {
+                return false
+            }
+
+            when (it.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    isMoving = true
+                    lastX = it.rawX
+                    lastY = it.rawY
+                    showBorder()
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    if (isMoving) {
+                        val deltaX = it.rawX - lastX
+                        val deltaY = it.rawY - lastY
+
+                        this.x += deltaX
+                        this.y += deltaY
+
+                        lastX = it.rawX
+                        lastY = it.rawY
+
+                        updateBorderSize()
+                    }
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    isMoving = false
+                    hideBorderAfterDelay()
+                }
+            }
         }
-
-        handler.postDelayed(hideButtonsRunnable!!, 2000)
+        return true
     }
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-        updateControlButtonPositions()
+    private fun showBorder() {
+        borderView.isVisible = true
+        hideBorderHandler.removeCallbacks(hideBorderRunnable)
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        updateControlButtonPositions()
+    private fun hideBorderAfterDelay() {
+        hideBorderHandler.postDelayed(hideBorderRunnable, 2000)
     }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        hideButtonsRunnable?.let { handler.removeCallbacks(it) }
+    fun setImageResource(resId: Int) {
+        if (resId != 0) { // Kiểm tra ID hình ảnh hợp lệ
+            stickerImageView.setImageResource(resId)
+            updateButtonPositions()
+            updateBorderSize() // Cập nhật viền ngay lập tức
+        }
     }
 }

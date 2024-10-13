@@ -55,7 +55,6 @@ class StickerImportDialog(
                 stickerMemeView.visibility = View.VISIBLE
                 stickerMemeView.setImageResource(selectedMeme) // Thêm hình ảnh meme
             }
-
             dismiss() // Đóng dialog sau khi thêm nhãn dán
         }
 
@@ -70,4 +69,5 @@ class StickerImportDialog(
             adapter = memeAdapter
         }
     }
+
 }

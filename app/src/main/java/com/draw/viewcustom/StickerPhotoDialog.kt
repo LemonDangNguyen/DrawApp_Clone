@@ -17,8 +17,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.NonNull
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.draw.R
@@ -64,7 +62,7 @@ class StickerPhotoDialog(
             selectedImagePath?.let { path ->
                 val bitmap = getBitmapFromPath(path)
                 bitmap?.let {
-                    stickerPhotoView.setImage(it) // Sử dụng Bitmap thay vì String
+                    stickerPhotoView.setImageBitmap(it) // Sử dụng Bitmap thay vì String
                 }
             }
             stickerPhotoView.visibility = View.VISIBLE // Hiển thị StickerPhotoView
