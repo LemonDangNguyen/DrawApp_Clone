@@ -21,7 +21,7 @@ class StickerTextDialog(
 
 
     private lateinit var mColorPreview: View
-     override fun onCreateView(
+    override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {

@@ -402,7 +402,7 @@ class DrawActivity : BaseActivity() {
 
 
     fun showStickerTextDialog(stickerTextView: StickerTextView) {
-       val dialog = StickerTextDialog(stickerTextView, mDefaultColor)
+        val dialog = StickerTextDialog(stickerTextView, mDefaultColor)
         dialog.show(supportFragmentManager, "StickerTextDialog")
     }
 
