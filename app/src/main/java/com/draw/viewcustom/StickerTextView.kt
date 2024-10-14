@@ -1,6 +1,8 @@
 package com.draw.viewcustom
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.ShapeDrawable
@@ -322,6 +324,12 @@ class StickerTextView @JvmOverloads constructor(
             }
         }
         return true
+    }
+    fun getStickerBitmap(): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        draw(canvas)
+        return bitmap
     }
 
 }

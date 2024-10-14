@@ -524,8 +524,32 @@ class DrawActivity : BaseActivity() {
             val drawBitmap = getBitmapFromPathListHistory(draw.listHistory, binding.drawView.width, binding.drawView.height)
             canvas.drawBitmap(drawBitmap, 0f, 0f, null)
 
+            // Vẽ nội dung từ StickerTextView lên canvas
+            val stickerTextBitmap = binding.stickerTextView.getStickerBitmap()
+            stickerTextBitmap?.let {
+                // Lấy tọa độ của stickerTextView
+                val stickerTextX = binding.stickerTextView.x
+                val stickerTextY = binding.stickerTextView.y
+
+                // Vẽ bitmap tại vị trí đã được xác định
+                canvas.drawBitmap(it, stickerTextX, stickerTextY, null)
+            }
 
 
+            val stickerMemeBitmap = binding.stickerMemeView.getStickerBitmap()
+            stickerMemeBitmap?.let {
+
+                val stickerMemeX = binding.stickerMemeView.x
+                val stickerMemeY = binding.stickerMemeView.y
+                canvas.drawBitmap(it, stickerMemeX, stickerMemeY, null)
+            }
+
+            val stickerPhotoBitmap = binding.stickerPhotoView.getStickerBitmap()
+            stickerPhotoBitmap?.let {
+                val stickerPhotoX = binding.stickerPhotoView.x
+                val stickerPhotoY = binding.stickerPhotoView.y
+                canvas.drawBitmap(it, stickerPhotoX, stickerPhotoY, null)
+            }
             encoder.addFrame(frameBitmap)
         }
         encoder.finish()
@@ -560,8 +584,5 @@ class DrawActivity : BaseActivity() {
 
         dialog1.show()
     }
-
-
-
 
 }

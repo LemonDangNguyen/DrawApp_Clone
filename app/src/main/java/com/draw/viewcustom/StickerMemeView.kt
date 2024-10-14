@@ -1,6 +1,8 @@
 package com.draw.viewcustom
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.ShapeDrawable
@@ -309,5 +311,12 @@ class StickerMemeView @JvmOverloads constructor(
             updateButtonPositions()
             updateBorderSize() // Cập nhật viền ngay lập tức
         }
+    }
+
+    fun getStickerBitmap(): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        draw(canvas)
+        return bitmap
     }
 }
