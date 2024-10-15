@@ -3,7 +3,6 @@
 package com.draw.activity
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -14,15 +13,13 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.ColorDrawable
+import android.os.Build.VERSION_CODES.S
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
@@ -49,18 +46,17 @@ import com.draw.ultis.ViewControl.invisible
 import com.draw.ultis.ViewControl.visible
 import com.draw.viewcustom.DrawView
 import com.draw.viewcustom.StickerImportDialog
+import com.draw.viewcustom.StickerManager
 import com.draw.viewcustom.StickerMemeView
 import com.draw.viewcustom.StickerPhotoDialog
 import com.draw.viewcustom.StickerPhotoView
 import com.draw.viewcustom.StickerTextDialog
 import com.draw.viewcustom.StickerTextView
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import yuku.ambilwarna.AmbilWarnaDialog
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -77,7 +73,7 @@ class DrawActivity : BaseActivity() {
     private var isGuide = false
     private lateinit var animationGuide: AnimationGuide
     private var timeDelay = 100L
-
+    private lateinit var stickerManager: StickerManager
     private lateinit var dialog: Dialog
     private lateinit var bindingDialog: DialogProgressBinding
     private var mDefaultColor = 0
@@ -88,15 +84,10 @@ class DrawActivity : BaseActivity() {
         binding.btnCreateAnimation.isClickable = false
         binding.btnCreateAnimation.isSelected = true
         binding.btnCreateAnimation.isClickable = true
-        val stickerPhotoView = binding.stickerPhotoView
-        val stickerMemeView = binding.stickerMemeView
         binding.btnPrevios.isEnabled = false
-        val stickerTextView = binding.stickerTextView
-        stickerTextView.visibility = View.GONE
-        stickerPhotoView.visibility =View.GONE
-        stickerMemeView.visibility = View.GONE
         isGuide = intent.getIntExtra(KEY_POSITION_ANIM_GUIDE, -1) != -1
-
+        val stickerContainer = binding.stickerContainer // Lấy tham chiếu đến sticker container
+        stickerManager = StickerManager(stickerContainer)
 
         if (isGuide) {
             val position = intent.getIntExtra(KEY_POSITION_ANIM_GUIDE, -1)
@@ -180,9 +171,23 @@ class DrawActivity : BaseActivity() {
             onBackPressed()
         }
         binding.btnUndo.setOnClickListener {
+            val action = stickerManager.undo()
+            action?.let {
+                // Cập nhật giao diện hoặc trạng thái nếu cần thiết
+                Toast.makeText(this, "Undo: ${it.sticker.javaClass.simpleName}", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Toast.makeText(this, "Nothing to undo", Toast.LENGTH_SHORT).show()
+            }
             binding.drawView.setUndo()
         }
         binding.btnRedo.setOnClickListener {
+            val action = stickerManager.redo()
+            action?.let {
+                // Cập nhật giao diện hoặc trạng thái nếu cần thiết
+                Toast.makeText(this, "Redo: ${it.sticker.javaClass.simpleName}", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Toast.makeText(this, "Nothing to redo", Toast.LENGTH_SHORT).show()
+            }
             binding.drawView.setRedo()
         }
 
@@ -217,7 +222,6 @@ class DrawActivity : BaseActivity() {
             binding.btnEraser.backgroundTintList = null
             binding.btnPen.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#01C296"))
             binding.btnPen.imageTintList = null
-            stickerTextView.visibility = View.VISIBLE
         }
 
         binding.btnEraser.setOnClickListener {
@@ -236,6 +240,7 @@ class DrawActivity : BaseActivity() {
 
         binding.btnReset.setOnClickListener {
             binding.drawView.clearDraw()
+            resetStickers()
         }
 
         binding.btnColor.setOnClickListener {
@@ -257,16 +262,18 @@ class DrawActivity : BaseActivity() {
             adapter.makeCopy(binding.drawView.width, binding.drawView.height)
             binding.lnPenwidth.gone()
         }
+
+
+
         binding.btnInsertText.setOnClickListener {
-            showStickerTextDialog(stickerTextView)
+            showStickerTextDialog(stickerTextView = StickerTextView(this), defaultX = 0f, defaultY = 0f) // Gọi phương thức hiển thị dialog để thêm sticker text
         }
         binding.btnInsertPicture.setOnClickListener {
-            showStickerPhotoDialog(stickerPhotoView)
+            showStickerPhotoDialog(stickerPhotoView = StickerPhotoView(this), defaultX = 0f, defaultY = 0f) // Gọi phương thức hiển thị dialog để thêm sticker photo
         }
         binding.btnInsertSticker.setOnClickListener {
-            showStickerImportDialog( stickerMemeView)
+            showStickerImportDialog(stickerMemeView = StickerMemeView(this), defaultX = 0f, defaultY = 0f) // Gọi phương thức hiển thị dialog để thêm sticker meme
         }
-
 
         binding.btnOption.setOnClickListener {
             Toast.makeText(this, "Comming soon!", Toast.LENGTH_SHORT).show()
@@ -389,22 +396,33 @@ class DrawActivity : BaseActivity() {
             stopPreview()
         }
     }
-
-    private fun showStickerImportDialog( stickerMemeView: StickerMemeView) {
-        val dialog = StickerImportDialog(stickerMemeView)
-        dialog.show(supportFragmentManager, "StickerImportDialog")
+    private fun showStickerTextDialog(stickerTextView: StickerTextView, defaultX: Float, defaultY: Float) {
+        // Tạo một dialog để nhập sticker văn bản
+        val dialog = StickerTextDialog(stickerTextView, mDefaultColor)
+        dialog.setOnStickerTextEntered { text ->
+            stickerManager.addStickerText(text, defaultX, defaultY) // Thêm sticker text vào sticker manager
+        }
+        dialog.show(supportFragmentManager, "StickerTextDialog")
     }
 
-    private fun showStickerPhotoDialog(stickerPhotoView: StickerPhotoView) {
+    private fun showStickerPhotoDialog(stickerPhotoView: StickerPhotoView, defaultX: Float, defaultY: Float) {
+        // Tạo một dialog để chọn sticker ảnh
         val dialog = StickerPhotoDialog(stickerPhotoView, this@DrawActivity)
+        dialog.setOnStickerPhotoSelected { bitmap ->
+            stickerManager.addStickerPhoto(bitmap, defaultX, defaultY) // Thêm sticker photo vào sticker manager
+        }
         dialog.show(supportFragmentManager, "StickerPhotoDialog")
     }
 
-
-    fun showStickerTextDialog(stickerTextView: StickerTextView) {
-        val dialog = StickerTextDialog(stickerTextView, mDefaultColor)
-        dialog.show(supportFragmentManager, "StickerTextDialog")
+    private fun showStickerImportDialog(stickerMemeView: StickerMemeView, defaultX: Float, defaultY: Float) {
+        // Tạo một dialog để nhập sticker meme
+        val dialog = StickerImportDialog(stickerMemeView)
+        dialog.setOnMemeSelected { resId ->
+            stickerManager.addStickerMeme(resId, defaultX, defaultY) // Thêm sticker meme vào sticker manager
+        }
+        dialog.show(supportFragmentManager, "StickerImportDialog")
     }
+
 
 
     private fun showDialogProgress() {
@@ -524,39 +542,29 @@ class DrawActivity : BaseActivity() {
             val drawBitmap = getBitmapFromPathListHistory(draw.listHistory, binding.drawView.width, binding.drawView.height)
             canvas.drawBitmap(drawBitmap, 0f, 0f, null)
 
-            // Vẽ nội dung từ StickerTextView lên canvas
-            val stickerTextBitmap = binding.stickerTextView.getStickerBitmap()
-            stickerTextBitmap?.let {
-                // Lấy tọa độ của stickerTextView
-                val stickerTextX = binding.stickerTextView.x
-                val stickerTextY = binding.stickerTextView.y
-
-                // Vẽ bitmap tại vị trí đã được xác định
-                canvas.drawBitmap(it, stickerTextX, stickerTextY, null)
-            }
-
-
-            val stickerMemeBitmap = binding.stickerMemeView.getStickerBitmap()
-            stickerMemeBitmap?.let {
-
-                val stickerMemeX = binding.stickerMemeView.x
-                val stickerMemeY = binding.stickerMemeView.y
-                canvas.drawBitmap(it, stickerMemeX, stickerMemeY, null)
-            }
-
-            val stickerPhotoBitmap = binding.stickerPhotoView.getStickerBitmap()
-            stickerPhotoBitmap?.let {
-                val stickerPhotoX = binding.stickerPhotoView.x
-                val stickerPhotoY = binding.stickerPhotoView.y
-                canvas.drawBitmap(it, stickerPhotoX, stickerPhotoY, null)
-            }
+            drawStickers(canvas)
             encoder.addFrame(frameBitmap)
         }
         encoder.finish()
         return bos.toByteArray()
     }
+    private fun drawStickers(canvas: Canvas) {
+        for ((sticker, position) in stickerManager.getStickers()) {
+            val stickerBitmap = when (sticker) {
+                is StickerTextView -> sticker.getStickerBitmap()
+                is StickerPhotoView -> sticker.getStickerBitmap()
+                is StickerMemeView -> sticker.getStickerBitmap()
+                else -> null
+            }
 
-
+            stickerBitmap?.let {
+                // Lấy vị trí từ tuple
+                val (x, y) = position
+                // Vẽ bitmap tại vị trí của sticker
+                canvas.drawBitmap(it, x, y, null)
+            }
+        }
+    }
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
@@ -583,6 +591,10 @@ class DrawActivity : BaseActivity() {
         }
 
         dialog1.show()
+    }
+
+    private fun resetStickers() {
+        stickerManager.removeAllStickers() // Gọi hàm xóa tất cả sticker
     }
 
 }

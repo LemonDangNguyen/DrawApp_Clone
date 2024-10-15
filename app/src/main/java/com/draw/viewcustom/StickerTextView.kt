@@ -28,7 +28,7 @@ class StickerTextView @JvmOverloads constructor(
 
     private var text: String = "Sticker"
     private lateinit var stickerTextView: TextView
-    private lateinit var borderView: RelativeLayout
+    lateinit var borderView: RelativeLayout
     private lateinit var deleteButton: AppCompatImageView
     private lateinit var flipButton: AppCompatImageView
     private lateinit var transformButton: AppCompatImageView
@@ -150,7 +150,6 @@ class StickerTextView @JvmOverloads constructor(
 
         updateButtonPositions()
     }
-
     private fun updateButtonPositions() {
         val buttonSize = 50
         val borderPadding = -3
@@ -160,35 +159,29 @@ class StickerTextView @JvmOverloads constructor(
             addRule(ALIGN_PARENT_END, TRUE)
             setMargins(borderPadding, borderPadding, borderPadding, borderPadding)
         }
-
         flipButton.layoutParams = LayoutParams(buttonSize, buttonSize).apply {
             addRule(ALIGN_PARENT_TOP, TRUE)
             addRule(CENTER_HORIZONTAL, TRUE)
             setMargins(0, borderPadding, 0, borderPadding)
         }
-
         transformButton.layoutParams = LayoutParams(buttonSize, buttonSize).apply {
             addRule(ALIGN_PARENT_BOTTOM, TRUE)
             addRule(ALIGN_PARENT_END, TRUE)
             setMargins(borderPadding, 0, borderPadding, borderPadding)
         }
-
         rotateButton.layoutParams = LayoutParams(buttonSize, buttonSize).apply {
             addRule(ALIGN_PARENT_BOTTOM, TRUE)
             addRule(ALIGN_PARENT_START, TRUE)
             setMargins(borderPadding, 0, borderPadding, borderPadding)
         }
     }
-
     private fun flipSticker() {
         stickerTextView.scaleX *= -1
 
     }
-
     private fun removeSticker() {
         this.visibility = View.GONE
     }
-
     private fun handleTransform(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -198,7 +191,6 @@ class StickerTextView @JvmOverloads constructor(
                 borderView.isVisible = true
                 hideBorderHandler.removeCallbacks(hideBorderRunnable)
             }
-
             MotionEvent.ACTION_MOVE -> {
                 if (isResizing) {
                     val deltaX = event.rawX - lastX
@@ -211,12 +203,10 @@ class StickerTextView @JvmOverloads constructor(
                         stickerTextView.scaleY = newScaleY
                         updateBorderSize()
                     }
-
                     lastX = event.rawX
                     lastY = event.rawY
                 }
             }
-
             MotionEvent.ACTION_UP -> {
                 isResizing = false
                 hideBorderHandler.postDelayed(hideBorderRunnable, 2000)
@@ -224,7 +214,6 @@ class StickerTextView @JvmOverloads constructor(
         }
         return true
     }
-
     private fun handleRotate(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -253,21 +242,18 @@ class StickerTextView @JvmOverloads constructor(
         }
         return true
     }
-
     private fun getAngle(x: Float, y: Float): Float {
         val dx = x - midPoint[0]
         val dy = y - midPoint[1]
         return (atan2(dy, dx) * (180 / Math.PI)).toFloat()
     }
-
     fun setTextColor(color: Int) {
         stickerTextView.setTextColor(color)
-    }
 
+    }
     fun setICallBackCheck(callback: ICallBackCheck) {
         isHandleCheck = callback
     }
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event?.let {
             // Lấy tọa độ chạm
@@ -280,13 +266,11 @@ class StickerTextView @JvmOverloads constructor(
                 getHitRect(rect)
                 rect
             }
-
             // Kiểm tra xem điểm chạm có nằm trong vùng stickerTextView hay không
             if (!stickerRect.contains(touchX.toInt(), touchY.toInt())) {
                 // Nếu không chạm vào stickerTextView thì không di chuyển sticker
                 return false
             }
-
             // Nếu chạm vào stickerTextView thì xử lý di chuyển
             when (it.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -300,7 +284,6 @@ class StickerTextView @JvmOverloads constructor(
 
                     }
                 }
-
                 MotionEvent.ACTION_MOVE -> {
                     if (isMoving) {
                         val deltaX = it.rawX - lastX
@@ -314,12 +297,10 @@ class StickerTextView @JvmOverloads constructor(
 
                     }
                 }
-
                 MotionEvent.ACTION_UP -> {
                     isMoving = false
                     hideBorderHandler.postDelayed(hideBorderRunnable, 2000)
                 }
-
                 else -> {}
             }
         }
@@ -332,4 +313,7 @@ class StickerTextView @JvmOverloads constructor(
         return bitmap
     }
 
+    interface OnStickerDeleteListener {
+        fun onStickerDelete(sticker: View)
+    }
 }

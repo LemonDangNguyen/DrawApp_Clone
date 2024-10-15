@@ -291,6 +291,7 @@ class DrawView @JvmOverloads constructor(
         pathListHistory.add(null)
         onDrawChange?.onDrawChange()
         invalidate()
+
     }
 
     fun getHistoryPaint(): MutableList<PaintPath?> {

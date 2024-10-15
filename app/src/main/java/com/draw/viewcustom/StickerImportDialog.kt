@@ -19,7 +19,12 @@ class StickerImportDialog(
 ) : BottomSheetDialogFragment() {
 
     private lateinit var memeAdapter: MemeAdapter // Thêm biến này để truy cập adapter của meme
+    private var onMemeSelected: ((Int) -> Unit)? = null
 
+    // Phương thức này sẽ được gọi để thiết lập callback
+    fun setOnMemeSelected(listener: (Int) -> Unit) {
+        onMemeSelected = listener
+    }
     @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,6 +59,7 @@ class StickerImportDialog(
                 // Đặt meme vào StickerMemeView
                 stickerMemeView.visibility = View.VISIBLE
                 stickerMemeView.setImageResource(selectedMeme) // Thêm hình ảnh meme
+                onMemeSelected?.invoke(selectedMeme) // Gọi callback với meme đã chọn
             }
             dismiss() // Đóng dialog sau khi thêm nhãn dán
         }

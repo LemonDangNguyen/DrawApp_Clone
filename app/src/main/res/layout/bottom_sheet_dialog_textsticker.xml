@@ -90,32 +90,14 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="24dp"
         android:background="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
-<!--    <TextView-->
-<!--        android:id="@+id/set_color_button"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginHorizontal="16dp"-->
-<!--        android:layout_marginTop="32dp"-->
-<!--        android:background="@drawable/bg_radius_56dp"-->
-<!--        android:backgroundTint="#01C296"-->
-<!--        android:ellipsize="marquee"-->
-<!--        android:fontFamily="@font/nunito_bold"-->
-<!--        android:gravity="center"-->
-<!--        android:marqueeRepeatLimit="marquee_forever"-->
-<!--        android:paddingHorizontal="16dp"-->
-<!--        android:paddingVertical="16dp"-->
-<!--        android:singleLine="true"-->
-<!--        android:textColor="@color/white"-->
-<!--        android:textSize="18sp"-->
-<!--        android:text="Set Color"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/preview_selected_color" />-->
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -175,7 +175,7 @@ class StickerMemeView @JvmOverloads constructor(
     }
 
     private fun removeSticker() {
-        this.visibility = View.GONE
+       //
     }
 
     private fun handleTransform(event: MotionEvent): Boolean {

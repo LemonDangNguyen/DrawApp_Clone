@@ -1,3 +1,4 @@
+ // Vẽ nội dung từ StickerTextView lên canvas
             val stickerTextBitmap = binding.stickerTextView.getStickerBitmap()
             stickerTextBitmap?.let {
                 // Lấy tọa độ của stickerTextView
@@ -8,9 +9,87 @@
                 canvas.drawBitmap(it, stickerTextX, stickerTextY, null)
             }
 
-
             val stickerMemeBitmap = binding.stickerMemeView.getStickerBitmap()
-            canvas.drawBitmap(stickerMemeBitmap, 0f, 0f, null)
+            stickerMemeBitmap?.let {
+
+                val stickerMemeX = binding.stickerMemeView.x
+                val stickerMemeY = binding.stickerMemeView.y
+                canvas.drawBitmap(it, stickerMemeX, stickerMemeY, null)
+            }
 
             val stickerPhotoBitmap = binding.stickerPhotoView.getStickerBitmap()
-            canvas.drawBitmap(stickerPhotoBitmap, 0f, 0f, null)
+            stickerPhotoBitmap?.let {
+                val stickerPhotoX = binding.stickerPhotoView.x
+                val stickerPhotoY = binding.stickerPhotoView.y
+                canvas.drawBitmap(it, stickerPhotoX, stickerPhotoY, null)
+            }
+
+
+
+
+
+
+
+
+    private fun setCurrentSticker(sticker: StickerTextView) {
+        currentSticker?.borderView?.isVisible = false // Ẩn border của sticker trước đó
+        currentSticker = sticker
+        currentSticker?.borderView?.isVisible = true  // Hiển thị border cho sticker được chọn
+    }
+
+    private fun handleStickerTouch(view: View, event: MotionEvent): Boolean {
+        if (view is StickerTextView) {
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    setCurrentSticker(view)
+                }
+            }
+        }
+        return view.onTouchEvent(event) // Sử dụng phương thức onTouchEvent của StickerTextView
+    }
+
+    // Hàm để lấy bitmap của toàn bộ StickerContainerView (gồm tất cả các sticker)
+    fun getStickerContainerBitmap(): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        draw(canvas) // Vẽ toàn bộ view container lên canvas
+        return bitmap
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    binding.btnUndo.setOnClickListener {
+        if (stickerManager.setUndo()) {
+            // Cập nhật trạng thái nút Undo nếu thành công
+            binding.btnUndo.isEnabled = stickerManager.getStickers().isNotEmpty()
+            binding.btnRedo.isEnabled = stickerManager.getStickersUndo().isNotEmpty()
+        } else {
+            // Hiển thị thông báo nếu không có gì để undo
+            Toast.makeText(this, "Không có gì để hoàn tác", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    binding.btnRedo.setOnClickListener {
+        if (stickerManager.setRedo()) {
+            // Cập nhật trạng thái nút Redo nếu thành công
+            binding.btnUndo.isEnabled = stickerManager.getStickers().isNotEmpty()
+            binding.btnRedo.isEnabled = stickerManager.getStickersUndo().isNotEmpty()
+        } else {
+            // Hiển thị thông báo nếu không có gì để redo
+            Toast.makeText(this, "Không có gì để làm lại", Toast.LENGTH_SHORT).show()
+        }
+    }

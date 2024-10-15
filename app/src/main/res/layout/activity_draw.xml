@@ -190,7 +190,8 @@
             android:thumb="@drawable/custom_thumb" />
     </LinearLayout>
 
-    <FrameLayout
+    <RelativeLayout
+        android:id="@+id/sticker_container_relative"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/ln_bottom"
@@ -198,24 +199,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ln_pen"
         app:layout_constraintVertical_bias="0.4">
+
         <com.draw.viewcustom.DrawView
             android:id="@+id/draw_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:penColor="#000000"
             app:penWidth="10" />
-        <com.draw.viewcustom.StickerPhotoView
-            android:id="@+id/stickerPhotoView"
+
+        <!-- Container để chứa các Sticker -->
+        <FrameLayout
+            android:id="@+id/sticker_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-        <com.draw.viewcustom.StickerMemeView
-            android:id="@+id/stickerMemeView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-        <com.draw.viewcustom.StickerTextView
-            android:id="@+id/stickerTextView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
 
         <ImageView
             android:id="@+id/img_preview"
@@ -223,9 +219,8 @@
             android:layout_height="match_parent"
             android:background="@color/white"
             android:visibility="invisible" />
+    </RelativeLayout>
 
-
-    </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ln_bottom"

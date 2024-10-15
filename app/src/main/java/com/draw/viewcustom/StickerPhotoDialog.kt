@@ -43,7 +43,12 @@ class StickerPhotoDialog(
     companion object {
         private const val REQUEST_PERMISSION = 1
     }
+    private var onStickerPhotoSelected: ((Bitmap) -> Unit)? = null
 
+    // Phương thức này sẽ được gọi để thiết lập callback
+    fun setOnStickerPhotoSelected(listener: (Bitmap) -> Unit) {
+        onStickerPhotoSelected = listener
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -63,11 +68,15 @@ class StickerPhotoDialog(
                 val bitmap = getBitmapFromPath(path)
                 bitmap?.let {
                     stickerPhotoView.setImageBitmap(it) // Sử dụng Bitmap thay vì String
+                    stickerPhotoView.visibility = View.VISIBLE // Hiển thị StickerPhotoView
+
+                    // Gọi callback với stickerPhotoView đã được cập nhật
+                    onStickerPhotoSelected?.invoke(it) // Truyền Bitmap thay vì View nếu cần
                 }
             }
-            stickerPhotoView.visibility = View.VISIBLE // Hiển thị StickerPhotoView
             dismiss() // Đóng BottomSheetDialog sau khi cập nhật
         }
+
 
 
         return dialogView
