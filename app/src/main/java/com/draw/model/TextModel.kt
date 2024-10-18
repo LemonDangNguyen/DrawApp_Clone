@@ -1,8 +1,11 @@
 package com.draw.model
 
+import android.graphics.Color
+
 data class TextModel (
-    val text: String = "",
-    val textcolor: Int = 0,
+    val id: Int,
+    val text: String = "StickerTextView",
+    val textcolor: Int = Color.BLACK,
     val textSize: Int = 24,
     val font: String = "",
     val background: Int = 0
